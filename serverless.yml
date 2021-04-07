@@ -1,0 +1,74 @@
+service: custom-domain45
+plugins:
+  - serverless-lambda-edge-pre-existing-cloudfront
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
+  cloudFront:
+    cachePolicies:
+      myCachePolicy:
+        MinTTL: 0
+        MaxTTL: 86000
+        DefaultTTL: 3600
+
+package:
+    individually: true
+    patterns:
+      - '!excluded-by-default.json'
+
+functions:
+  lambda1:
+    handler: lambda1/index.hello
+    package:
+      patterns:
+        - '!lambda1/index.js'
+      exclude:
+        - 'lambda2/*'
+    events:
+      
+      - http:
+          path: /lambda1
+          method: GET
+          cors: true
+  lambda5:
+    handler: lambda2/index.hello
+    package:
+      patterns:
+        - '!lambda2/index.js'
+      exclude:
+        - 'lambda1/*'
+    events:
+      - preExistingCloudFront:
+        # ---- Mandatory Properties -----
+          distributionId: ELBZCDNO2QMJ9
+          includeBody: true 
+        # ---- Optional Property -----
+          stage: dev
+          eventType: viewer-request
+          origin:
+            DomainName: https://fac4fjglw8.execute-api.us-east-1.amazonaws.com
+            OriginPath: /dev
+            CustomOriginConfig:
+              OriginProtocolPolicy: match-viewer
+          pathPattern: /lambda2
+          cachePolicy:
+            name: myCachePolicy
+          behavior:
+            ViewerProtocolPolicy: https-only
+            AllowedMethods:
+              - 'GET'
+              - 'HEAD'
+              - 'OPTIONS'
+              - 'PUT'
+              - 'PATCH'
+              - 'POST'
+              - 'DELETE'
+      - http:
+          path: /lambda2
+          method: GET
+          cors: true
+  
+   
+
