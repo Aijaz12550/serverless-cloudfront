@@ -108,7 +108,7 @@ functions:
           cors: true
 custom:
   cloudfront:
-    distributionId: ELBZCDNO2QMJ9
+    distributionId: //ID
     behaviors: 
       lambda2:
         lambdaAssociations:
