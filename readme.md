@@ -5,3 +5,7 @@
 ### 2. but we can create a distribution through template and can create multiple distribution in the template.
 
 ### 3. we can create individual packages of each lambda to avoiding duplication of unneccery code.
+
+### 4. The code is rough due to practice.
+
+### 5. for creating new distribution no plugin is required.
