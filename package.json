@@ -1,0 +1,13 @@
+{
+  "name": "custom_domain",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Aijaz12550 <muhammadaijaz76@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "serverless-lambda-edge-pre-existing-cloudfront": "^1.1.5"
+  },
+  "devDependencies": {
+    "serverless-cloudfront-plugin": "^0.2.5"
+  }
+}

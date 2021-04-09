@@ -1,6 +1,7 @@
 service: custom-domain45
 plugins:
   - serverless-lambda-edge-pre-existing-cloudfront
+  - serverless-cloudfront-plugin
 provider:
   name: aws
   runtime: nodejs12.x
@@ -10,8 +11,8 @@ provider:
     cachePolicies:
       myCachePolicy:
         MinTTL: 0
-        MaxTTL: 86000
-        DefaultTTL: 3600
+        MaxTTL: 0
+        DefaultTTL: 0
 
 package:
     individually: true
@@ -24,15 +25,54 @@ functions:
     package:
       patterns:
         - '!lambda1/index.js'
-      exclude:
-        - 'lambda2/*'
+      include:
+        - 'lambda1/*'
+      # exclude:
+      #   - 'lambda2/*'
     events:
       
       - http:
           path: /lambda1
           method: GET
           cors: true
-  lambda5:
+  lambda6:
+    handler: lambda2/index.hello
+    package:
+      patterns:
+        - '!lambda2/index.js'
+      include:
+        - 'lambda2/*'
+      # exclude:
+      #   - 'lambda1/*'
+    events:
+      - cloudFront:
+          stage: dev
+          eventType: viewer-request
+          origin:
+            DomainName: ufucllcidl.execute-api.us-east-1.amazonaws.com
+            OriginPath: /dev
+            CustomOriginConfig:
+              OriginProtocolPolicy: match-viewer
+          cachePolicy:
+            name: myCachePolicy
+          pathPattern: /lambda2
+          behavior:
+            
+            ViewerProtocolPolicy: https-only
+            AllowedMethods:
+              - 'GET'
+              - 'HEAD'
+              # - 'OPTIONS'
+              # - 'PUT'
+              # - 'PATCH'
+              # - 'POST'
+              # - 'DELETE'
+      - http:
+          path: /lambda2
+          method: GET
+          cors: true
+
+  lambda7:
     handler: lambda2/index.hello
     package:
       patterns:
@@ -40,35 +80,55 @@ functions:
       exclude:
         - 'lambda1/*'
     events:
-      - preExistingCloudFront:
-        # ---- Mandatory Properties -----
-          distributionId: ELBZCDNO2QMJ9
-          includeBody: true 
-        # ---- Optional Property -----
+      - cloudFront:
           stage: dev
           eventType: viewer-request
           origin:
-            DomainName: https://fac4fjglw8.execute-api.us-east-1.amazonaws.com
+            DomainName: ufucllcidl.execute-api.us-east-1.amazonaws.com
             OriginPath: /dev
             CustomOriginConfig:
               OriginProtocolPolicy: match-viewer
-          pathPattern: /lambda2
           cachePolicy:
             name: myCachePolicy
+          pathPattern: /lambda7
           behavior:
+            
             ViewerProtocolPolicy: https-only
             AllowedMethods:
               - 'GET'
               - 'HEAD'
-              - 'OPTIONS'
-              - 'PUT'
-              - 'PATCH'
-              - 'POST'
-              - 'DELETE'
+              # - 'OPTIONS'
+              # - 'PUT'
+              # - 'PATCH'
+              # - 'POST'
+              # - 'DELETE'
       - http:
           path: /lambda2
           method: GET
           cors: true
+custom:
+  cloudfront:
+    distributionId: ELBZCDNO2QMJ9
+    behaviors: 
+      lambda2:
+        lambdaAssociations:
+          viewerRequest : lambda6
+
+resources:
+  Resources:
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          PriceClass: PriceClass_100
+          Aliases:
+            - api.tciq.world
+          ViewerCertificate:
+            AcmCertificateArn: //ARN
+            SslSupportMethod: sni-only
+
+      
+  
   
    
 

@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports.hello = async event => {
-console.log("ee ee")
+console.log("eee")
   return {
     statusCode: 200,
     body: JSON.stringify(
